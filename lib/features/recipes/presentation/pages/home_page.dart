@@ -10,7 +10,6 @@ import '../bloc/recipe_state.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/shimmer_card.dart';
-import '../../../favorites/bloc/favorites_cubit.dart';
 import 'favorites_page.dart';
 import '../../data/datasources/location_service.dart';
 
@@ -59,22 +58,26 @@ class _HomePageState extends State<HomePage> {
                 color: AppTheme.error,
                 child: _isOffline
                     ? const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.wifi_off_rounded,
-                        color: Colors.white, size: 16),
-                    SizedBox(width: 8),
-                    Text('No internet — showing cached recipes',
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 12)),
-                  ],
-                )
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.wifi_off_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'No internet — showing cached recipes',
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ],
+                      )
                     : null,
               ),
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () => _cubit.loadContextualRecipes(
-                      detectedArea: _detectedArea),
+                  onRefresh: () =>
+                      _cubit.loadContextualRecipes(detectedArea: _detectedArea),
                   color: AppTheme.primary,
                   child: CustomScrollView(
                     slivers: [
@@ -130,8 +133,10 @@ class _HomePageState extends State<HomePage> {
                 color: AppTheme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.restaurant_menu_rounded,
-                  color: AppTheme.primary),
+              child: const Icon(
+                Icons.restaurant_menu_rounded,
+                color: AppTheme.primary,
+              ),
             ),
           ],
         ),
@@ -179,8 +184,13 @@ class _HomePageState extends State<HomePage> {
                 }
               },
               child: Chip(
-                label: Text(label),
-                backgroundColor: AppTheme.surface,
+                label: Text(
+                  label,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                ),
+                backgroundColor: AppTheme.primary,
                 side: const BorderSide(color: Color(0xFFE0E0E0)),
               ),
             );
@@ -246,12 +256,16 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.search_off_rounded,
-                  size: 64, color: AppTheme.textSecondary),
+              Icon(
+                Icons.search_off_rounded,
+                size: 64,
+                color: AppTheme.textSecondary,
+              ),
               SizedBox(height: 16),
-              Text('No recipes found',
-                  style: TextStyle(
-                      color: AppTheme.textSecondary, fontSize: 16)),
+              Text(
+                'No recipes found',
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+              ),
             ],
           ),
         ),
@@ -262,7 +276,7 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(16),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
-              (context, index) => RecipeCard(recipe: recipes[index]),
+          (context, index) => RecipeCard(recipe: recipes[index]),
           childCount: recipes.length,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -335,16 +349,17 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                color: selected ? AppTheme.primary : AppTheme.textSecondary),
+            Icon(
+              icon,
+              color: selected ? AppTheme.primary : AppTheme.textSecondary,
+            ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 11,
                 color: selected ? AppTheme.primary : AppTheme.textSecondary,
-                fontWeight:
-                selected ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ],
@@ -368,15 +383,19 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.wifi_off_rounded,
-                size: 72, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.wifi_off_rounded,
+              size: 72,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Something went wrong',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(

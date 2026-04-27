@@ -225,9 +225,19 @@ class DetailPage extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () async {
-          final url = Uri.parse(recipe.youtubeUrl!);
-          if (await canLaunchUrl(url)) {
-            await launchUrl(url, mode: LaunchMode.externalApplication);
+          final rawUrl = recipe.youtubeUrl;
+
+          if (rawUrl == null || rawUrl.isEmpty) {
+            print("URL is empty");
+            return;
+          }
+
+          final url = Uri.parse(
+            rawUrl.startsWith("http") ? rawUrl : "https://$rawUrl",
+          );
+
+          if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+            print("Could not launch $url");
           }
         },
         icon: const Icon(Icons.play_circle_outline_rounded),
