@@ -1,0 +1,11 @@
+import '../entities/recipe.dart';
+import '../repositories/recipe_repository.dart';
+
+class SearchRecipes {
+  final RecipeRepository repository;
+  SearchRecipes(this.repository);
+
+  Future<List<Recipe>> call(String query) {
+    return repository.searchRecipes(query);
+  }
+}
