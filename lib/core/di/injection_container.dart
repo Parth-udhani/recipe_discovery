@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../../features/recipes/domain/usecases/recipe_usecases.dart';
 import '../network/connectivity_service.dart';
 import '../../features/recipes/data/datasources/recipe_remote_datasource.dart';
 import '../../features/recipes/data/datasources/recipe_local_datasource.dart';
@@ -9,9 +10,7 @@ import '../../features/recipes/data/datasources/location_service.dart';
 import '../../features/recipes/data/models/recipe_model.dart';
 import '../../features/recipes/data/repositories/recipe_repository_impl.dart';
 import '../../features/recipes/domain/repositories/recipe_repository.dart';
-import '../../features/recipes/domain/usecases/get_recipes_by_category.dart';
-import '../../features/recipes/domain/usecases/get_recipes_by_area.dart';
-import '../../features/recipes/domain/usecases/search_recipes.dart';
+
 import '../../features/recipes/presentation/bloc/recipe_cubit.dart';
 import '../../features/favorites/hive/favorite_recipe_hive.dart';
 import '../../features/favorites/bloc/favorites_cubit.dart';

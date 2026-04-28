@@ -1,28 +1,29 @@
+// lib/core/constants/app_constants.dart
 class AppConstants {
-  // API
+  // ── API ───────────────────────────────────────────────────────────────────
   static const String baseUrl = 'https://www.themealdb.com/api/json/v1/1';
-  static const String searchUrl = '$baseUrl/search.php';
-  static const String filterUrl = '$baseUrl/filter.php';
+  static const String searchUrl  = '$baseUrl/search.php';
+  static const String filterUrl  = '$baseUrl/filter.php';
   static const String categoryUrl = '$baseUrl/categories.php';
-  static const String lookupUrl = '$baseUrl/lookup.php';
+  static const String lookupUrl  = '$baseUrl/lookup.php';
 
-  // Hive Box Names
-  static const String favoritesBox = 'favorites_box';
+  // ── Hive ──────────────────────────────────────────────────────────────────
+  static const String favoritesBox    = 'favorites_box';
   static const String cachedRecipesBox = 'cached_recipes_box';
 
-  // Time-based meal categories
+  // ── Meal categories ───────────────────────────────────────────────────────
   static const String breakfast = 'Breakfast';
-  static const String lunch = 'Lunch';
-  static const String dinner = 'Dinner';
+  static const String lunch     = 'Lunch';
+  static const String dinner    = 'Dinner';
 
-  // Location fallback
+  // ── Location fallback ─────────────────────────────────────────────────────
   static const String defaultCuisine = 'Indian';
-  static const String defaultArea = 'India';
+  static const String defaultArea    = 'India';
 
-  // Debounce duration
+  // ── Search debounce ───────────────────────────────────────────────────────
   static const int debounceMilliseconds = 500;
 
-  // Map country to TheMealDB area
+  // ── Country → TheMealDB area mapping ─────────────────────────────────────
   static const Map<String, String> countryToCuisine = {
     'India': 'Indian',
     'United States': 'American',
@@ -50,39 +51,25 @@ class AppConstants {
     'Ukraine': 'Ukrainian',
   };
 
-  // Get meal category based on time
+  // ── Time-based helpers ────────────────────────────────────────────────────
+  // Single read so all three helpers are consistent within the same call.
+  static int get _hour => DateTime.now().hour;
+
   static String getMealCategory() {
-    final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 11) {
-      return breakfast;
-    } else if (hour >= 11 && hour < 16) {
-      return lunch;
-    } else {
-      return dinner;
-    }
+    if (_hour >= 5 && _hour < 11) return breakfast;
+    if (_hour >= 11 && _hour < 16) return lunch;
+    return dinner;
   }
 
-  // Get greeting based on time
   static String getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 12) {
-      return 'Good Morning';
-    } else if (hour >= 12 && hour < 17) {
-      return 'Good Afternoon';
-    } else {
-      return 'Good Evening';
-    }
+    if (_hour >= 5  && _hour < 12) return 'Good Morning';
+    if (_hour >= 12 && _hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
   }
 
-  // Get emoji based on time
   static String getMealEmoji() {
-    final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 11) {
-      return '🌅';
-    } else if (hour >= 11 && hour < 16) {
-      return '☀️';
-    } else {
-      return '🌙';
-    }
+    if (_hour >= 5  && _hour < 11) return '🌅';
+    if (_hour >= 11 && _hour < 16) return '☀️';
+    return '🌙';
   }
 }

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/network/connectivity_service.dart';
+import '../../../notifications/notification_service.dart';
 import '../../domain/entities/recipe.dart';
+import '../../domain/usecases/recipe_usecases.dart';
 import '../bloc/recipe_cubit.dart';
 import '../bloc/recipe_state.dart';
 import '../widgets/recipe_card.dart';
@@ -85,10 +88,43 @@ class _HomePageState extends State<HomePage> {
                       _buildSearchBar(),
                       _buildCategoryChips(),
                       _buildBody(),
+
                     ],
                   ),
                 ),
               ),
+              // In any page (wrap in kDebugMode)
+
+                ElevatedButton(
+                    // onPressed: () async {
+                    //   final plugin = FlutterLocalNotificationsPlugin();
+                    //
+                    //   await plugin.show(
+                    //     999,
+                    //     "Instant Test",
+                    //     "If you see this, notifications work",
+                    //     const NotificationDetails(
+                    //       android: AndroidNotificationDetails(
+                    //         'test_channel',
+                    //         'Test',
+                    //         importance: Importance.high,
+                    //         priority: Priority.high,
+                    //       ),
+                    //     ),
+                    //   );
+                    // },
+                  onPressed: () async {
+                    print("Button clicked");
+                    final svc = sl<NotificationService>();
+                    final recipes = await sl<GetRecipesByCategory>().call('Chicken');
+                    await svc.scheduleTestNotifications(
+                      breakfast: recipes.first,
+                      lunch: recipes.first,
+                      dinner: recipes.first,
+                    );
+                  },
+                  child: const Text('[DEV] Test Notifications'),
+                )
             ],
           ),
         ),

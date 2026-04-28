@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/get_recipes_by_category.dart';
-import '../../domain/usecases/get_recipes_by_area.dart';
-import '../../domain/usecases/search_recipes.dart';
+import '../../domain/usecases/recipe_usecases.dart';
 import '../../domain/repositories/recipe_repository.dart';
 import '../../../../core/constants/app_constants.dart';
 import 'recipe_state.dart';
