@@ -49,6 +49,7 @@ class _RecipeAppState extends State<RecipeApp> {
   @override
   void initState() {
     super.initState();
+
     _requestPermissionsAndSchedule();
   }
 
