@@ -14,11 +14,24 @@ class FavoritesPage extends StatefulWidget {
   State<FavoritesPage> createState() => _FavoritesPageState();
 }
 
-class _FavoritesPageState extends State<FavoritesPage> {
+class _FavoritesPageState extends State<FavoritesPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pageController;
+
   @override
   void initState() {
     super.initState();
+    _pageController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
     context.read<FavoritesCubit>().loadFavorites();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -45,39 +58,53 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
+  // ── Empty State ───────────────────────────────────────────────────────────
+
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: AppTheme.heartColor.withOpacity(0.1),
-              shape: BoxShape.circle,
+    return FadeTransition(
+      opacity: _pageController,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ScaleTransition(
+              scale: CurvedAnimation(
+                parent: _pageController,
+                curve: Curves.elasticOut,
+              ),
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: AppTheme.heartColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.favorite_border_rounded,
+                    size: 50, color: AppTheme.heartColor),
+              ),
             ),
-            child: const Icon(Icons.favorite_border_rounded,
-                size: 50, color: AppTheme.heartColor),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'No favorites yet',
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Tap the heart on any recipe\nto save it here',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-          ),
-        ],
+            const SizedBox(height: 24),
+            const Text(
+              'No favorites yet',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tap the heart on any recipe\nto save it here',
+              textAlign: TextAlign.center,
+              style:
+              TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  // ── List with staggered animations ───────────────────────────────────────
 
   Widget _buildList(List<Recipe> favorites) {
     return ListView.separated(
@@ -85,12 +112,39 @@ class _FavoritesPageState extends State<FavoritesPage> {
       itemCount: favorites.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final recipe = favorites[index];
-        return _FavoriteItem(recipe: recipe);
+        // Each item staggers its entry by 80 ms × index, capped at 400 ms.
+        final staggerDelay = (index * 80).clamp(0, 400);
+        final startInterval = staggerDelay / 800.0;
+        final endInterval = (startInterval + 0.5).clamp(0.0, 1.0);
+
+        final slideAnimation = Tween<Offset>(
+          begin: const Offset(0.3, 0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(
+          parent: _pageController,
+          curve: Interval(startInterval, endInterval, curve: Curves.easeOut),
+        ));
+
+        final fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+          CurvedAnimation(
+            parent: _pageController,
+            curve: Interval(startInterval, endInterval, curve: Curves.easeIn),
+          ),
+        );
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: SlideTransition(
+            position: slideAnimation,
+            child: _FavoriteItem(recipe: favorites[index]),
+          ),
+        );
       },
     );
   }
 }
+
+// ── Favorite Item ─────────────────────────────────────────────────────────────
 
 class _FavoriteItem extends StatelessWidget {
   final Recipe recipe;
@@ -128,10 +182,12 @@ class _FavoriteItem extends StatelessWidget {
                   fit: BoxFit.cover,
                   placeholder: (_, __) =>
                       Container(color: AppTheme.shimmerBase),
-                  errorWidget: (_, __, ___) =>
-                  const Icon(Icons.restaurant, color: AppTheme.textSecondary),
+                  errorWidget: (_, __, ___) => const Icon(
+                      Icons.restaurant,
+                      color: AppTheme.textSecondary),
                 ),
               ),
+
               // Info
               Expanded(
                 child: Padding(
@@ -168,22 +224,42 @@ class _FavoriteItem extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          Text('· ${recipe.area}',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppTheme.textSecondary)),
+                          Text(
+                            '· ${recipe.area}',
+                            style: const TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary),
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
               ),
-              // Remove favorite
-              IconButton(
-                icon: const Icon(Icons.favorite_rounded,
-                    color: AppTheme.heartColor),
-                onPressed: () =>
-                    context.read<FavoritesCubit>().toggleFavorite(recipe),
+
+              // Remove from favorites — animated heart
+              BlocBuilder<FavoritesCubit, FavoritesState>(
+                builder: (context, _) => GestureDetector(
+                  onTap: () =>
+                      context.read<FavoritesCubit>().toggleFavorite(recipe),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) => ScaleTransition(
+                        scale: CurvedAnimation(
+                            parent: animation, curve: Curves.elasticOut),
+                        child: child,
+                      ),
+                      child: const Icon(
+                        Icons.favorite_rounded,
+                        key: ValueKey('fav'),
+                        color: AppTheme.heartColor,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

@@ -11,7 +11,6 @@ class NotificationService {
 
   final _plugin = FlutterLocalNotificationsPlugin();
 
-  // Shared channel details — defined once, reused everywhere.
   static const _details = NotificationDetails(
     android: AndroidNotificationDetails(
       'meal_reminders',
@@ -35,11 +34,10 @@ class NotificationService {
         ),
       ),
     );
-    AppLogger.info('NotificationService initialised');
   }
 
-  // ── Production: schedule at fixed meal times each day ─────────────────────
-
+  /// Schedule (or re-schedule) daily meal notifications.
+  /// Passing null for a meal silently skips that slot.
   Future<void> scheduleMealNotifications({
     Recipe? breakfast,
     Recipe? lunch,
@@ -61,20 +59,13 @@ class NotificationService {
           "Tonight's suggestion: ${dinner.name}", 19, 0, now);
     }
 
-    AppLogger.info('Meal notifications scheduled');
+    AppLogger.success('Meal notifications scheduled');
   }
 
-  // ── Testing: fires notifications in 5 / 10 / 15 seconds ──────────────────
-  //
-  // Call this from a debug button (e.g. in HomePage) to instantly verify that
-  // notifications are delivered without waiting for 8 AM / 2 PM / 7 PM.
-  //
-  //   await sl<NotificationService>().scheduleTestNotifications(
-  //     breakfast: breakfastRecipe,
-  //     lunch: lunchRecipe,
-  //     dinner: dinnerRecipe,
-  //   );
+  // ── Dev / testing helper ──────────────────────────────────────────────────
 
+  /// Fires test notifications in 15 / 20 / 25 seconds.
+  /// Wrap calls in `if (kDebugMode)` at the call site.
   Future<void> scheduleTestNotifications({
     Recipe? breakfast,
     Recipe? lunch,
@@ -84,49 +75,29 @@ class NotificationService {
     final now = tz.TZDateTime.now(tz.local);
 
     final meals = [
-      (
-      id: 1,
-      title: '🌅 [TEST] Breakfast',
-      body: 'Try ${breakfast?.name ?? "a recipe"} to start your day!',
-      delay: 900,
-      ),
-      (
-      id: 2,
-      title: '☀️ [TEST] Lunch',
-      body: 'How about ${lunch?.name ?? "a recipe"} for lunch!',
-      delay: 1200,
-      ),
-      (
-      id: 3,
-      title: '🌙 [TEST] Dinner',
-      body: 'Tonight: ${dinner?.name ?? "a recipe"}!',
-      delay: 1800,
-      ),
+      (id: 1, title: '🌅 [TEST] Breakfast',
+      body: 'Try ${breakfast?.name ?? "a recipe"} to start your day!', delay: 15),
+      (id: 2, title: '☀️ [TEST] Lunch',
+      body: 'How about ${lunch?.name ?? "a recipe"} for lunch!', delay: 20),
+      (id: 3, title: '🌙 [TEST] Dinner',
+      body: 'Tonight: ${dinner?.name ?? "a recipe"}!', delay: 25),
     ];
 
     for (final m in meals) {
       final scheduled = now.add(Duration(seconds: m.delay));
       await _plugin.zonedSchedule(
-        m.id,
-        m.title,
-        m.body,
-        scheduled,
-        _details,
+        m.id, m.title, m.body, scheduled, _details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
       );
-      print("NOW: ${tz.TZDateTime.now(tz.local)}");
-      print("SCHEDULED: $scheduled");
-      AppLogger.debug('Scheduling at: $scheduled');
-      AppLogger.debug('Test notification #${m.id} in ${m.delay}s');
+      AppLogger.debug('Test notification #${m.id} → fires in ${m.delay}s');
     }
 
-    AppLogger.info('Test notifications scheduled (5 / 10 / 15 seconds)');
+    AppLogger.success('Test notifications scheduled (15 / 20 / 25 s)');
   }
 
-  // ── Private helper ─────────────────────────────────────────────────────────
+  // ── Private ───────────────────────────────────────────────────────────────
 
   Future<void> _scheduleDaily(
       int id,
@@ -139,22 +110,18 @@ class NotificationService {
     var scheduled = tz.TZDateTime(
         tz.local, now.year, now.month, now.day, hour, minute);
 
-    // If the time has already passed today, push to tomorrow.
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
     await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduled,
-      _details,
+      id, title, body, scheduled, _details,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // 🔥 DAILY repeat
-      // androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
       uiLocalNotificationDateInterpretation:
       UILocalNotificationDateInterpretation.absoluteTime,
     );
+
+    AppLogger.debug('Notification #$id scheduled → ${hour.toString().padLeft(2, "0")}:${minute.toString().padLeft(2, "0")} daily');
   }
 }

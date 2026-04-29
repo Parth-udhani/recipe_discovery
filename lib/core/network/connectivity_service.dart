@@ -9,7 +9,7 @@ class ConnectivityService {
   Stream<bool> get onConnectivityChanged => _controller.stream;
 
   ConnectivityService() {
-    AppLogger.info( 'Initializing connectivity listener...');
+    AppLogger.info( 'Initializing connectivity  listener...');
 
     _connectivity.onConnectivityChanged.listen((results) {
       final connected = _hasConnection(results);
