@@ -10,12 +10,12 @@ import '../../features/recipes/data/datasources/location_service.dart';
 import '../../features/recipes/data/models/recipe_model.dart';
 import '../../features/recipes/data/repositories/recipe_repository_impl.dart';
 import '../../features/recipes/domain/repositories/recipe_repository.dart';
-
 import '../../features/recipes/presentation/bloc/recipe_cubit.dart';
 import '../../features/favorites/hive/favorite_recipe_hive.dart';
 import '../../features/favorites/bloc/favorites_cubit.dart';
 import '../../features/notifications/notification_service.dart';
 import '../constants/app_constants.dart';
+import '../utils/app_logger.dart';
 
 final sl = GetIt.instance;
 
